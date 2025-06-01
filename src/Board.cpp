@@ -3,6 +3,7 @@
 Board::Board(int w, int h) : width(w), height(h)
 {
     initialize();
+    initializeGraphics();
 }
 
 Board::~Board() {}
