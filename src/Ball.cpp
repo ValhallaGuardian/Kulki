@@ -3,7 +3,7 @@
 
 
 Ball::Ball(BallColor color, sf::Vector2f position)
-    : color(color), position(position)
+    : position(position), color(color)
 {
     shape.setRadius(20.0f);
     shape.setFillColor(getSFMLColor(color)); // Default color   
@@ -11,13 +11,25 @@ Ball::Ball(BallColor color, sf::Vector2f position)
 }
 Ball::~Ball() {}
 
+void Ball::draw(sf::RenderWindow &window) 
+{
+    window.draw(shape);
+}
 
+void Ball::update() 
+{
+    // Na razie pusta - można dodać animacje, ruch itp. w przyszłości
+}
 
+BallColor Ball::getColor() const 
+{
+    return color;
+}
 
-
-
-
-
+sf::Vector2f Ball::getPosition() const 
+{
+    return position;
+}
 
 sf::Color Ball::getSFMLColor(BallColor ballColor) const {
     switch (ballColor) {
@@ -36,4 +48,16 @@ sf::Color Ball::getSFMLColor(BallColor ballColor) const {
         default:
             return sf::Color::White;
     }
+}
+
+void Ball::setColor(BallColor newColor) 
+{
+    color = newColor;
+    shape.setFillColor(getSFMLColor(newColor));
+}
+
+void Ball::setPosition(sf::Vector2f newPosition) 
+{
+    position = newPosition;
+    shape.setPosition(newPosition);
 }

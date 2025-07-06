@@ -39,12 +39,28 @@ void Game::handleEvents()
                 }
             }
         }
+        
+        if (event->is<sf::Event::MouseButtonPressed>())
+        {
+            if (const auto *mouseEvent = event->getIf<sf::Event::MouseButtonPressed>())
+            {
+                if (mouseEvent->button == sf::Mouse::Button::Left)
+                {
+                    // Sprawdź czy gra się nie skończyła
+                    if (!board.isGameOver())
+                    {
+                        sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+                        board.handleMouseClick(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
+                    }
+                }
+            }
+        }
     }
 }
 
 void Game::update()
 {
-    // Update game logic here
+    board.update(); // Aktualizuj logikę planszy (miganie itp.)
 }
 
 void Game::render()
