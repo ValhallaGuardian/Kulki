@@ -47,6 +47,13 @@ private:
     bool gameOver;
     int ballsToAdd; // Ile kulek dodać po ruchu
 
+    // UI Elements
+    sf::Font font;
+    sf::Text scoreText;
+    sf::Text gameOverText;
+    sf::Text restartText;
+    bool fontLoaded;
+
 public:
     Board(int w, int h);
     ~Board();

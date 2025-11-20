@@ -37,6 +37,10 @@ void Game::handleEvents()
                 {
                     window.close();
                 }
+                else if (keyEvent->code == sf::Keyboard::Key::R)
+                {
+                    board.reset();
+                }
             }
         }
         

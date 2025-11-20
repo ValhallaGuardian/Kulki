@@ -8,7 +8,8 @@ Board::Board(int w, int h) : width(w), height(h),
     colorDist(0, 5),  // 6 kolorów: 0-5
     selectedX(-1), selectedY(-1), hasBallSelected(false), blinkState(false),
     lineAnimationActive(false), animationPhase(0), fastBlinkState(false),
-    score(0), comboMultiplier(1), gameOver(false), ballsToAdd(2)
+    score(0), comboMultiplier(1), gameOver(false), ballsToAdd(2),
+    scoreText(font), gameOverText(font), restartText(font), fontLoaded(false)
 {
     initialize();
     initializeGraphics();
@@ -63,17 +64,62 @@ void Board::initializeGraphics()
             cells[i][j].setOutlineColor(sf::Color(100, 100, 100));
         }
     }
+
+    // Load font
+    fontLoaded = false;
+    // Try common macOS font paths
+    if (font.openFromFile("/System/Library/Fonts/Supplemental/Arial.ttf")) {
+        fontLoaded = true;
+    } else if (font.openFromFile("/Library/Fonts/Arial.ttf")) {
+        fontLoaded = true;
+    } else if (font.openFromFile("/System/Library/Fonts/Helvetica.ttc")) {
+        fontLoaded = true;
+    }
+
+    if (fontLoaded) {
+        scoreText.setFont(font);
+        scoreText.setCharacterSize(30);
+        scoreText.setFillColor(sf::Color::White);
+        scoreText.setPosition({20.0f, 10.0f});
+        scoreText.setString("Score: 0");
+
+        gameOverText.setFont(font);
+        gameOverText.setCharacterSize(60);
+        gameOverText.setFillColor(sf::Color::Red);
+        gameOverText.setString("GAME OVER");
+        // Center text
+        sf::FloatRect textRect = gameOverText.getLocalBounds();
+        gameOverText.setOrigin({textRect.position.x + textRect.size.x/2.0f, textRect.position.y + textRect.size.y/2.0f});
+        gameOverText.setPosition({offsetX + (width * cellSize) / 2.0f, offsetY + (height * cellSize) / 2.0f - 40.0f});
+
+        restartText.setFont(font);
+        restartText.setCharacterSize(24);
+        restartText.setFillColor(sf::Color::White);
+        restartText.setString("Press R to Restart");
+        sf::FloatRect restartRect = restartText.getLocalBounds();
+        restartText.setOrigin({restartRect.position.x + restartRect.size.x/2.0f, restartRect.position.y + restartRect.size.y/2.0f});
+        restartText.setPosition({offsetX + (width * cellSize) / 2.0f, offsetY + (height * cellSize) / 2.0f + 40.0f});
+    }
 }
 
 void Board::reset()
 {
+    score = 0;
+    gameOver = false;
+    comboMultiplier = 1;
+    
     for (int i = 0; i < height; ++i)
     {
         for (int j = 0; j < width; ++j)
         {
             grid[i][j] = 0;
+            balls[i][j] = nullptr;
+            lineMarked[i][j] = false;
         }
     }
+    
+    generateBalls();
+    generateNextBalls();
 }
 
 void Board::draw(sf::RenderWindow &window)
@@ -110,6 +156,22 @@ void Board::draw(sf::RenderWindow &window)
     
     // Rysuj preview następnych kulek
     drawNextBalls(window);
+
+    if (fontLoaded) {
+        scoreText.setString("Score: " + std::to_string(score));
+        window.draw(scoreText);
+
+        if (gameOver) {
+            // Draw semi-transparent overlay
+            sf::RectangleShape overlay({(float)width * cellSize, (float)height * cellSize});
+            overlay.setPosition({offsetX, offsetY});
+            overlay.setFillColor(sf::Color(0, 0, 0, 150));
+            window.draw(overlay);
+
+            window.draw(gameOverText);
+            window.draw(restartText);
+        }
+    }
 }
 
 void Board::drawGrid(sf::RenderWindow &window)
@@ -711,8 +773,20 @@ void Board::updateFloatingScores()
 
 void Board::drawFloatingScores(sf::RenderWindow& window)
 {
-    // Implementacja w następnym kroku - potrzebujemy sf::Font
-    // Na razie zostawiamy pustą metodę
+    if (!fontLoaded) return;
+
+    sf::Text text(font);
+    text.setCharacterSize(20);
+    text.setFillColor(sf::Color::Yellow);
+    text.setOutlineColor(sf::Color::Black);
+    text.setOutlineThickness(1.0f);
+
+    for (const auto& score : floatingScores)
+    {
+        text.setString("+" + std::to_string(score.second));
+        text.setPosition(score.first);
+        window.draw(text);
+    }
 }
 
 bool Board::hasMarkedLines()
